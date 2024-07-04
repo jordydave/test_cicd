@@ -1,0 +1,59 @@
+name: SIT
+on:
+  # schedule:
+  #   - cron: '30 11 * * 3'
+  workflow_dispatch:
+    # inputs:
+    #   version:
+    #     default: '12.9.1'
+    #     required: true
+    #     description: 'Version Number'
+    #   order:
+    #     default: '0'
+    #     required: true
+    #     description: 'Build Order'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Java SDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - name: Android SDK
+        uses: android-actions/setup-android@v2
+        
+      - name: Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.2'
+          channel: 'stable'
+          cache: true
+          
+      - name: Flutter Check Version
+        run: flutter --version
+        
+      - name: install firebase
+        run: ${{ secrets.INSTALL_FIREBASE }}
+      - name: Checkout Repo
+      
+        run: ${{ secrets.CHECKOUT_REPO }}
+        
+      - name: Get Commit Message
+        id: vars
+        run: |
+          cd test_cicd
+          echo "note=$(echo $(git log -1 --pretty=format:"%s"))" >> $GITHUB_OUTPUT
+          
+      - name: Build APK
+        run: |
+          cd test_cicd
+          ${{ secrets.BUILD_SIT }}
+          
+      - name: Upload to FAD
+        run: |
+          cd test_cicd
+          ${{ secrets.DEPLOY_SIT }} --release-notes "${{ steps.vars.outputs.note }}"
