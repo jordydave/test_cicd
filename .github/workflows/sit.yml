@@ -56,4 +56,4 @@ jobs:
       - name: Upload to FAD
         run: |
           cd test_cicd
-          ${{ secrets.DEPLOY_SIT }} --release-notes "${{ steps.vars.outputs.note }}"
+          ${{ secrets.DEPLOY_SIT }} --release-notes "${{ steps.vars.outputs.note }}" --token "${{ secrets.TOKEN }}"
